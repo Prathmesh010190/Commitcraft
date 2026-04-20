@@ -2,39 +2,75 @@
 
 ### AI commit messages. Fully offline. No API key needed.
 
-CommitCraft reads your staged diff, asks a local or cloud AI model for 3 well-crafted commit messages, and commits the one you pick. It learns your team's style from your last 20 commits, works 100% offline via [Ollama](https://ollama.com), and falls back to [Anthropic's Claude](https://www.anthropic.com/) if you'd rather use an API.
+![CommitCraft demo](./demo.gif)
+
+> ✨ **Works 100% offline — no API key required.** CommitCraft runs on your machine via [Ollama](https://ollama.com) by default. An Anthropic Claude provider is available if you prefer the API, but it's entirely optional.
+
+CommitCraft reads your staged diff, asks a local or cloud AI model for 3 well-crafted commit messages, and commits the one you pick. It learns your team's style from your last 20 commits, detects breaking changes, and can even draft your PR description.
 
 ---
 
-## Demo
+## 2-Minute Quickstart
+
+### Offline (recommended — free, private)
+
+```bash
+# 1. Install Ollama and pull a chat-capable model
+# https://ollama.com/download
+ollama serve &
+ollama pull qwen3.5:cloud
+
+# 2. Install CommitCraft
+pip install -e .
+
+# 3. Use it in any git repo
+git add <files>
+cc
+```
+
+### API (Anthropic Claude)
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+pip install -e '.[anthropic]'
+
+git add <files>
+cc --provider anthropic
+```
+
+That's it. No config file required — run `cc setup` only if you want to save a default.
+
+---
+
+## Demo (text)
 
 ```
-$ git add src/auth.py tests/test_auth.py
+$ git add auth.py
 $ cc
 
-╭─ Staged (2 files) ──────────────────────────╮
-│   • src/auth.py                             │
-│   • tests/test_auth.py                      │
+╭─ Staged (1 file) ───────────────────────────╮
+│   • auth.py                                 │
 ╰─────────────────────────────────────────────╯
-🤖 Using ollama (qwen2.5-coder:7b)
+🤖 Using ollama (qwen3.5:cloud)
 ⠋ Crafting commit messages…
 
-          Commit suggestions
-┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ # ┃ Message                                 ┃ Why                           ┃
-┡━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ 1 │ feat(auth): add token refresh flow      │ Emphasizes the new feature.   │
-│ 2 │ fix(auth): handle expired access tokens │ Framed as a bugfix for UX.    │
-│ 3 │ refactor(auth): extract token helper    │ Highlights code organization. │
-└───┴─────────────────────────────────────────┴───────────────────────────────┘
+                   Commit suggestions
+┏━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ # ┃ Message                               ┃ Why                            ┃
+┡━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ 1 │ feat: implement sha256 password …      │ Frames it as a new feature.    │
+│ 2 │ fix: replace stubbed verify logic …    │ Treats the hardcoded return    │
+│   │                                        │ as a bug to correct.           │
+│ 3 │ refactor: add check_hash helper …      │ Highlights code organization.  │
+└───┴────────────────────────────────────────┴────────────────────────────────┘
 ╭─ Summary ───────────────────────────────────╮
-│ Adds a refresh-token path to the auth       │
-│ module and covers it with unit tests.       │
+│ Replaces hardcoded verify success with      │
+│ SHA256 hashing logic.                       │
 ╰─────────────────────────────────────────────╯
 
-Pick 1/2/3  ·  edit  ·  regenerate  ·  quit  [1]: 1
+Pick 1/2/3  ·  edit  ·  regenerate  ·  quit  [1]: 2
 ╭─────────────────────────────────────────────╮
-│ ✓ Committed: feat(auth): add token refresh  │
+│ ✓ Committed: fix: replace stubbed verify …  │
 ╰─────────────────────────────────────────────╯
 ```
 
@@ -74,8 +110,8 @@ Then pick a path below. **You don't need both** — either one works on its own.
 # 2. Start the Ollama server
 ollama serve
 
-# 3. Pull a code-capable model (≈4 GB)
-ollama pull qwen2.5-coder:7b
+# 3. Pull a chat-capable model
+ollama pull qwen3.5:cloud
 
 # 4. In any git repo with staged changes:
 cc
@@ -139,7 +175,7 @@ Not in offline mode. Ollama runs fully on localhost. In API mode, the staged dif
 You'll see a friendly panel telling you how to start it. CommitCraft never crashes on a missing provider.
 
 **Can I use a different Ollama model?**
-Yes — `cc --model llama3.1:8b`, or set `COMMITCRAFT_OLLAMA_MODEL`, or save it via `cc setup`. Any chat-capable model works; code-tuned models (qwen2.5-coder, codellama, deepseek-coder) tend to produce the best commit messages.
+Yes — `cc --model llama3.1:8b`, or set `COMMITCRAFT_OLLAMA_MODEL`, or save it via `cc setup`. Any chat-capable model works; code-tuned models (`qwen3.5:cloud`, `qwen2.5-coder`, `codellama`, `deepseek-coder`) tend to produce the best commit messages.
 
 **What Python version do I need?**
 Python 3.9+.

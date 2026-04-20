@@ -18,12 +18,12 @@ from .base import (
 )
 
 
-DEFAULT_MODEL = "qwen2.5-coder:7b"
+DEFAULT_MODEL = "qwen3.5:cloud"
 DEFAULT_HOST = "http://localhost:11434"
 CHAT_ENDPOINT = "/api/chat"
 TAGS_ENDPOINT = "/api/tags"
 AVAILABILITY_TIMEOUT = 1.0
-GENERATION_TIMEOUT = 120.0
+GENERATION_TIMEOUT = 240.0
 
 
 class OllamaProvider(Provider):
